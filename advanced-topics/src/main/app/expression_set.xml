@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <flow name="expression_setFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/expression" doc:name="HTTP"/>
+        <set-payload value="#[['aa' : '1234', 'bb' : '2222', 'cc' : '3333']]" doc:name="Set Payload"/>
+        <expression-component doc:name="Expression"><![CDATA[payload.aa = 'aaaa';
+payload.bb = 'bbb';
+payload.ff = 'ffff';
+flowVars.temp = 'tempVars';]]></expression-component>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

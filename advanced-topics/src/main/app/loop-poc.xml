@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <flow name="loop-poc-for-each-TestFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/loop/foreach" doc:name="HTTP"/>
+        <flow-ref name="loop-poc-for-each-Flow" doc:name="loop-poc-for-each-Flow"/>
+    </flow>
+    <flow name="loop-poc-for-each-Flow">
+        <set-payload value="#[255]" doc:name="Set Payload"/>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy"><![CDATA[import java.util.ArrayList;
+int total_iteration = payload/10 + 1
+ArrayList<Integer> arr=new ArrayList<Integer>(Collections.nCopies(total_iteration, total_iteration));
+]]></scripting:script>
+        </scripting:component>
+        <foreach doc:name="For Each">
+            <logger message="#['counter=' + ((counter-1)*10+1) + '--' + (counter*10)  ]" level="INFO" doc:name="Logger"/>
+        </foreach>
+    </flow>
+</mule>

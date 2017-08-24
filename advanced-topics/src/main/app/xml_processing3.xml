@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+    <flow name="xml_processing3Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/xml-process3" doc:name="HTTP"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <set-variable variableName="country" value="#[xpath3('//*:Worker/*:Worker_Data/*:Personal_Data/*:Contact_Data/*:Address_Data/*:Country_Reference/*:ID[@*:type=\'ISO_3166-1_Alpha-2_Code\']')]" doc:name="Variable"/>
+        <set-variable variableName="company_reference_id" value="#[xpath3('//*:Organization_Data/*:Worker_Organization_Data/*:Organization_Reference/*:ID[@*:type=\'Company_Reference_ID\']') ]" doc:name="Variable"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="576fab93-10eb-4596-9318-964fa544ed90">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 urn:com.workday/bsvc
+---
+(flatten payload.ns0#Get_Workers_Response.ns0#Response_Data.ns0#Worker.ns0#Worker_Data.ns0#Personal_Data.ns0#Identification_Data.*ns0#Custom_ID map {
+	WON : $.ns0#Custom_ID_Data.ns0#ID when $.ns0#Custom_ID_Data.ns0#ID contains 'AMGNWO' otherwise null
+}) filter $.WON != null ]]></dw:set-payload>
+        </dw:transform-message>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy"><![CDATA[def workOrderNumber
+println (payload)
+payload.each {
+	if (it.get('WON') != null) {
+		println (it.get('WON'))
+	 	workOrderNumber = it.get('WON')
+	} 
+}
+
+return workOrderNumber]]></scripting:script>
+        </scripting:component>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="xml_processing3Flow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advance/xml/xpath3" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="a3ccbf15-c793-47ff-a15e-10e8542ae460">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 urn:com.workday/bsvc
+---
+{
+	staff_id: payload.ns0#Get_Workers_Response.ns0#Request_References.ns0#Worker_Reference.*ns0#ID[?($.@type == "Contingent_Worker_ID")][0],
+	staff_id1: payload.ns0#Get_Workers_Response.ns0#Response_Data.ns0#Worker.ns0#Worker_Data.ns0#Organization_Data.*ns0#Worker_Organization_Data.ns0#Organization_Reference.ns0#ID[?($.@type == "Contingent_Worker_ID")]
+	
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

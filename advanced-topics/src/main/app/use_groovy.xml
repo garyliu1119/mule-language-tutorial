@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <flow name="use_groovyFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/groovy" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <set-variable variableName="original_payload" value="#[payload]" doc:name="Variable"/>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy"><![CDATA[
+log.info('message id: ' + id)
+
+println('originalPayload: \n' + originalPayload)
+
+message.setOutboundProperty('Outbound_Property_One', 'Value_One')
+
+message.setProperty('Set_Property_One', 'Inbound_Property_One')
+                                
+def result = [:]
+
+original_payload = flowVars['original_payload']
+
+println (original_payload)
+println ('WORKER_ID=' + original_payload.get('workder_id'))
+result['worker_id'] = original_payload['workder_id']
+println(result)
+return result]]></scripting:script>
+        </scripting:component>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

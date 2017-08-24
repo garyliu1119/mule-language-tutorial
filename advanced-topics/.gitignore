@@ -1,0 +1,12 @@
+.metadata
+tmp/
+target/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.DS_Store
+catalog/

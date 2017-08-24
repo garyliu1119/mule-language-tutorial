@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <flow name="xml_process_TestFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/xml-transform" doc:name="HTTP"/>
+        <flow-ref name="xml_process_main-Flow" doc:name="xml_process_main-Flow"/>
+    </flow>
+    <flow name="xml_processFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/xml/java" doc:name="HTTP"/>
+        <flow-ref name="xml_process_java-Flow" doc:name="xml_process_java-Flow"/>
+    </flow>
+    <flow name="xml_process_main-Flow">
+        <dw:transform-message doc:name="Transform Message" metadata:id="847959ca-f056-49d1-bfe6-4b6c6821af5c">
+            <dw:input-payload mimeType="application/xml" doc:sample="D:\Users\gliu03\Documents\EW_Integration\Workday\SOAP\Worker_Business_Process_Transactions_Response_new.xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 urn:com.workday.report/Worker_Business_Process_Transactions
+---
+payload.ns0#Report_Data.*ns0#Report_Entry orderBy $.ns0#Transaction_Entry_Moment[-1..0]]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="xml_process_java-Flow">
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

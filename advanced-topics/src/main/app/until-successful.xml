@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <spring:beans>
+        <spring:bean id="objectStore" name="Bean" class="org.mule.util.store.SimpleMemoryObjectStore" />
+    </spring:beans>
+    
+    <flow name="until-successful-TestFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/until" doc:name="HTTP"/>
+        <flow-ref name="until-successful-Flow" doc:name="until-successful-Flow"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    
+    <flow name="until-successful-Flow">
+        <set-variable variableName="flow_counter" value="#[0]" doc:name="Variable"/>
+        <set-session-variable variableName="session_counter" value="#[0]" doc:name="Session Variable"/>
+        <until-successful 
+        	maxRetries="20" 
+        	millisBetweenRetries="1000" 
+        	failureExpression="#[session_counter  &lt; 5]" 
+        	synchronous="true"
+        	doc:name="Until Successful" >
+				<flow-ref name="until-successful-main-Flow" doc:name="until-successful-main-Flow"/>            
+        </until-successful>
+    </flow>
+    
+    <flow name="until-successful-main-Flow">
+    	<expression-component doc:name="Expression"><![CDATA[flow_counter += 1;
+session_counter += 1;]]></expression-component>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

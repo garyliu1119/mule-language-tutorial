@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <flow name="json_to_json_with_typeFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/groupby" doc:name="HTTP"/>
+        <set-variable variableName="message_rootid" value="#[message.rootId]" doc:name="Variable" />
+        
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload groupBy $."Transaction Type"]]></dw:set-payload>
+        </dw:transform-message>
+        
+        <scatter-gather doc:name="Scatter-Gather">
+            <flow-ref name="new_hire_main-Flow" doc:name="new_hire_main-Flow"/>
+            <flow-ref name="ter_hire_main-Flow" doc:name="ter_hire_main-Flow"/>
+        </scatter-gather>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+flatten payload ]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger" message="#['MESSAGE_ROOTID=' + flowVars.message_rootid + ', PAYLOAD: ' +  payload]"/>
+    </flow>
+    
+    <flow name="new_hire_main-Flow" processingStrategy="synchronous" >
+		<set-payload value="#[payload.HIR]" doc:name="HIR Payload"/>
+        <logger message="#['MESSAGE_ROOTID=' + flowVars.message_rootid + ', PAYLOAD: ' +  payload]" level="INFO" doc:name="Logger"/>
+        <tracking:transaction id="#[message_rootid]"/>    	
+    </flow>
+    
+    
+    <flow name="ter_hire_main-Flow" processingStrategy="synchronous" >
+        <set-payload value="#[payload.TER]" doc:name="TER Payload"/>
+        <logger message="#['MESSAGE_ROOTID=' + flowVars.message_rootid + ', PAYLOAD: ' +  payload]" level="INFO" doc:name="Logger"/>
+       	<tracking:transaction id="#[message_rootid]"/>       
+    </flow>
+    
+</mule>

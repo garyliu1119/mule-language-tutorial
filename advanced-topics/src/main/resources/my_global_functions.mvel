@@ -1,0 +1,28 @@
+
+                 def getReasonId2(reason) {
+                  	return StringUtils.splitAndTrim(reason, "-")[1];
+                 } 
+                 
+                 def normalizeDate (aDateString) {
+                 	date = new DateTime(aDateString, 'MM/dd/yyyy');
+          			date.format('yyyy-MM-dd');
+          			return date;
+                 }
+
+                 def normalizeDate2 (aDateString) {
+                 	date = new DateTime(aDateString, 'MM/dd/yyyy');
+          			date.format('yyyy-MM-dd');
+          			return date.toString();
+                 }
+                                  
+                 def mergeArray(data) {
+                 	sValue = StringUtils.join(data,',');
+                 	return sValue
+                 }
+                 
+                 def compareDates(d1, d2) {
+                 	System.out.println("d1: " + d1);
+                 	System.out.println("d2: " + d2);
+                 	System.out.println("result: " + (normalizeDate(d1) < normalizeDate(d2)));
+					return   (normalizeDate(d1) < normalizeDate(d2));               	
+                 }

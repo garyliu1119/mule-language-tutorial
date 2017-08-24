@@ -1,0 +1,12 @@
+<Envelope> 
+   <Header>
+      <Headers xmlns="urn:Ariba:Buyer:vrealm_2068">
+         <variant>vrealm_2068</variant>
+         <partition>prealm_2068</partition>
+      </Headers>
+   </Header>
+   <Body>
+      <RequisitionImportPullReply variant="vrealm_2068" partition="prealm_2068" />
+   </Body>
+</Envelope>
+

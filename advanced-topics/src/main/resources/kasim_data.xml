@@ -1,0 +1,21 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+                <soap:Body xmlns:tnsa="http://www.oracle.com/Argus/ProductFamilyEntity/v1.0">
+                                <RelsysServiceRequest xmlns="http://www.oracle.com/Argus/Contract/v1.0">
+                                                <Msg>
+                                                    <b:Version xmlns:b="http://www.oracle.com/Argus/Types/v1.0">1.0</b:Version>
+                                                    <b:TransformID xmlns:b="http://www.oracle.com/Argus/Types/v1.0">LOT_NUMBER</b:TransformID>
+                                                    <b:SafetyMessage xmlns:b="http://www.oracle.com/Argus/Types/v1.0">
+                                                      <tnsb:SAFETY_MESSAGE xmlns:tnsb="http://www.oracle.com/Argus/Lot_Request/v1.0" xmlns:tns="http://www.oracle.com/Argus/Base/v1.0" tns:Type="Request">
+                                                        <tnsb:LOT_LOOKUP>
+                                                          <tnsb:LOT>
+                                                            <tnsa:LOT_NUMBER>1234</tnsa:LOT_NUMBER>
+                                                            <tnsa:LOT_NUMBER>1235</tnsa:LOT_NUMBER>
+                                                            <tnsa:LOT_NUMBER>1236</tnsa:LOT_NUMBER>
+                                                          </tnsb:LOT>
+                                                        </tnsb:LOT_LOOKUP>
+                                                      </tnsb:SAFETY_MESSAGE>
+                                                    </b:SafetyMessage>
+                                  </Msg>
+                                </RelsysServiceRequest>
+                </soap:Body>
+</soap:Envelope>

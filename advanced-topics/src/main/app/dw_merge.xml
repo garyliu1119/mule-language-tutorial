@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+    <flow name="dw_mergeFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/dw/merge" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy"><![CDATA[def fg_pg_list = payload.fg_pg
+def wd_pg_list = payload.wd_pg
+def temp = [:]
+def result = []
+
+fg_pg_list.each {
+	temp = [:]
+	temp['provisioning_group'] = it
+	temp['status'] = 'Assigned'
+	result<<temp
+}
+
+fg_pg_list.each {
+	temp = [:]
+	temp['provisioning_group'] = it
+	temp['status'] = 'Unssigned'
+	result<<temp
+}
+return result]]></scripting:script>
+        </scripting:component>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="dw_mergeFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/dw/merge2" doc:name="HTTP"/>
+        <dw:transform-message doc:name="To Java">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <scripting:component doc:name="Build PG List">
+            <scripting:script engine="Groovy"><![CDATA[def fgList = []
+payload.fg_pg
+def wdList = payload.wd_fg
+def pgIntersection = fgList.intersect(wdList)
+
+wdList -= pgIntersection
+
+payload.fg = wdList
+
+return payload]]></scripting:script>
+        </scripting:component>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+(payload.fg_pg map {
+	provisioning_group : $,
+	status : "Assigned"
+}) ++
+(payload.wd_pg map {
+	provisioning_group : $,
+	status : "Assigned"
+})
+]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

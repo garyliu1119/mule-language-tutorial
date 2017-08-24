@@ -1,0 +1,33 @@
+[
+  {
+    "Security ID": "0513GL123",
+    "Job Seeker ID": "AGS2JS00048240",
+    "Worker ID": "AMAGWK00002680",
+    "Person ID": "z17051317282475815301934",
+    "Status": "Closed",
+    "First Name": "Gary",
+    "Last Name": "Liu",
+    "Worker Email": "gary_liu@sap.com",
+    "Job Posting Title": "Specialist IS Architect",
+    "Work Order ID": "AMAGWO00004154",
+    "Buyer Reference": "207157",
+    "Work Order/Work Order Revision Owner": "d_jyoti_administrator",
+    "Work Order/Work Order Revision Owner Employee ID": "",
+    "Org Unit Code": "25004313",
+    "Org Unit Name": "Clinical QC Process&Chemical Analysis II",
+    "Vendor Number": "AGS2",
+    "Vendor Name": "Allegis Global Solutions",
+    "Buyer Code": "AMAG",
+    "Remit To Address Code": "",
+    "Cost Center or WBS Element Name": "B23 DS Bulk Mfg_1001-10094",
+    "Cost Center or WBS Element Code": "1001-10094",
+    "Billable Per Diem": "0.00",
+    "Start Date": "05/01/2017",
+    "End Date": "05/01/2017",
+    "Closed Reason": "Voluntary - Assignment Completed",
+    "Currency": "USD",
+    "Job Site Code": "US01-0001",
+    "Job Site Name": "Amgen Inc-Thousand Oaks",
+    "Transaction Type": "TER"
+  }
+]

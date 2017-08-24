@@ -1,0 +1,86 @@
+[
+	{
+		"worker_id" : "AMAGWK00002674",
+		"position" : {
+			"comments" : "New Position",
+			"title" : "SOA Architect",
+			"description" : "SOA Architect - MuleSoft Architect",
+			"Organization_Reference_ID" : "25004631",
+			"Availability_Date" : "2017-04-20",
+			"Earliest_Hire_Date" : "2017-04-20",
+			"Job_Profile_ID" : "40000001",
+			"Company_Reference_ID" : "1001_VH1",
+			"Cost_Center_Reference_ID": "12323"
+		},
+		"requisition" : {
+		  "comments" : "",
+		  "position_id" : "35119956",
+		  "ges_id" : "GENERAL_EVENT_SUBCATEGORY-6-103",
+		  "recruiting_start_date" : "2017-04-20",
+		  "target_hire_date": "2017-04-20"
+		},
+		"applicant" : {
+		  "first_name" : "Gary2345",
+		  "middle_name" : "Charlie",
+		  "last_name" : "Liu2345",
+		  "email" : "garyliu2345@cnn.com",
+		  "CUT" : "Home",
+		  "applicant_entered_date" : "2017-04-20",
+		  "applicant_comments" : "Good",
+		  "position_id" : "35119956"
+		},
+		"contract-cw" : {
+		  "applicant_id" : "199488",
+		  "position_id" : "35119956",
+		  "organization_reference_id": "25004631",
+		  "job_profile_id" : "40000001",
+		  "first_day_of_work" : "2017-04-20",
+		  "contract_end_date" : "2018-04-20",
+		  "company_reference_id" : "1027",
+		  "cost_center_reference_id": "13289",
+		  "reson_id" : "Contract_Contingent_Worker_Contract_Contingent_Worker_Initial_Engagement"
+		}
+	},
+	{
+		"worker_id" : "AMAGWK00002675",
+		"position" : {
+			"comments" : "New Position 2",
+			"title" : "SOA Architect",
+			"description" : "SOA Architect - MuleSoft Architect",
+			"Organization_Reference_ID" : "25004631",
+			"Availability_Date" : "2017-04-20",
+			"Earliest_Hire_Date" : "2017-04-20",
+			"Job_Profile_ID" : "40000001",
+			"Company_Reference_ID" : "1001_VH1",
+			"Cost_Center_Reference_ID": "12323"
+		},
+		"requisition" : {
+		  "comments" : "",
+		  "position_id" : "35119956",
+		  "ges_id" : "GENERAL_EVENT_SUBCATEGORY-6-103",
+		  "recruiting_start_date" : "2017-04-20",
+		  "target_hire_date": "2017-04-20"
+		},
+		"applicant" : {
+		  "first_name" : "John2345",
+		  "middle_name" : "Charlie",
+		  "last_name" : "Smith2345",
+		  "email" : "John.Smith2345@cnn.com",
+		  "CUT" : "Home",
+		  "applicant_entered_date" : "2017-04-20",
+		  "applicant_comments" : "Good",
+		  "position_id" : "35119956"
+		},
+		"contract-cw" : {
+		  "applicant_id" : "199488",
+		  "position_id" : "35119956",
+		  "organization_reference_id": "25004631",
+		  "job_profile_id" : "40000001",
+		  "first_day_of_work" : "2017-04-20",
+		  "contract_end_date" : "2018-04-20",
+		  "company_reference_id" : "1027",
+		  "cost_center_reference_id": "13289",
+		  "reson_id" : "Contract_Contingent_Worker_Contract_Contingent_Worker_Initial_Engagement"
+		}
+	}
+]

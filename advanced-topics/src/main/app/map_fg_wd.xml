@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <flow name="map_fg_wdFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/format-date" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%type newdate = :string {format: "YYYY-MM-dd"}
+%function splitDate (adate) adate splitBy "/"
+%function formatDate(datestring)  datestring[2] ++ "-" ++ datestring[0] ++ "-" ++ datestring[1]
+
+---
+{
+	hire-date : formatDate(splitDate(payload.hire-date)) as :date
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="map_fg_wdFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/transform" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="16c300cd-c3fc-4f79-b823-43ee3cfcd442">
+            <dw:input-payload mimeType="application/json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%function getCostCenter(code)  code splitBy "-"
+%function mydate(data) data splitBy "/"
+%function formatDate(datestring)  datestring[2] ++ "-" ++ datestring[0] ++ "-" ++ datestring[1] 
+---
+payload map ((payload01 , indexOfPayload01) -> {
+	worker_id: payload01."Worker ID",
+	position: {
+		title: payload01."Job Posting Title",
+		Organization_Reference_ID: payload01."Org Unit Code",
+		Availability_Date: formatDate(mydate(payload01."Start Date")) as :date,
+		Earliest_Hire_Date: formatDate(mydate(payload01."Start Date")) as :date,
+		Job_Profile_ID: "40000001",
+		Company_Reference_ID: getCostCenter(payload01."Primary Cost Center Code")[0] ++ "_VH1",
+		Cost_Center_Reference_ID: getCostCenter(payload01."Primary Cost Center Code")[1]
+	},
+	requisition: {
+		comments: "Test",
+		position_id: "121345",
+		ges_id: "GENERAL_EVENT_SUBCATEGORY-6-103",
+		recruiting_start_date: formatDate(mydate(payload01."Start Date")) as :date,
+		target_hire_date: formatDate(mydate(payload01."Start Date")) as :date
+	},
+	applicant: {
+		first_name: payload01."First Name",
+		last_name: payload01."Last Name",
+		email: payload01."Worker Email",
+		CUT: "Home",
+		applicant_entered_date: formatDate(mydate(payload01."Start Date")) as :date,
+		position_id: "12345"
+	},
+	contract-cw: {
+		applicant_id: "12345",
+		position_id: "12345",
+		organization_reference_id: payload01."Org Unit Code",
+		job_profile_id: "40000001",
+		first_day_of_work: formatDate(mydate(payload01."Start Date")) as :date,
+		contract_end_date: formatDate(mydate(payload01."End Date")) as :date,
+		company_reference_id: getCostCenter(payload01."Primary Cost Center Code")[0],
+		cost_center_reference_id: getCostCenter(payload01."Primary Cost Center Code")[1],
+		reson_id: "Contract_Contingent_Worker_Contract_Contingent_Worker_Initial_Engagement"
+	}
+})]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <flow name="load_csvFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/load-csv" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="17b60c85-9e25-4a80-ab97-95a512850d1c">
+            <dw:input-payload mimeType="application/csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <set-variable variableName="original_fg_payload" value="#[payload]" doc:name="Variable"/>
+        <foreach doc:name="For Each">
+            <set-payload value="#[['staff_id': payload['Buyer Reference']]]" doc:name="Set Payload"/>
+            <expression-component doc:name="Expression"><![CDATA[flowVars.original_fg_payload[flowVars.counter-1]['Transaction Type'] = 'Changed']]></expression-component>
+            <logger level="INFO" doc:name="Logger"/>
+        </foreach>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
