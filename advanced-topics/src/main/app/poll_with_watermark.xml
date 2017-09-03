@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:objectstore="http://www.mulesoft.org/schema/mule/objectstore" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/objectstore http://www.mulesoft.org/schema/mule/objectstore/current/mule-objectstore.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <objectstore:config name="ObjectStore__Connector" 
+    	partition="gary_partition" 
+    	objectStore-ref="_defaultUserObjectStore" 
+    	persistent="true" 
+    	doc:name="ObjectStore: Connector"/>
+    	
+    <flow name="poll_with_watermarkFlow" processingStrategy="synchronous">
+        <poll doc:name="Poll">
+            <fixed-frequency-scheduler frequency="2" timeUnit="MINUTES"/>
+            <watermark variable="last_poll_date" 
+            	default-expression="#[(new org.mule.el.datetime.DateTime('1970-01-31','yyyy-MM-dd')).format('yyyy-MM-dd')]" 
+            	object-store-ref="_defaultUserObjectStore" 
+            	update-expression="#[flowVars.last_poll_date]" 
+            	selector-expression="#[flowVars.previousPollDate]"/>
+            	
+            <logger message="#['Poll Started at ' + server.dateTime.format('yyyy-MM-dd') + ' --' + flowVars.last_poll_date]" level="INFO" doc:name="Logger"/>
+        </poll>
+        <set-variable variableName="previousPollDate" value="#[flowVars.last_poll_date]" doc:name="Variable"/>
+        <logger level="INFO" doc:name="Logger" message="#[server.dateTime.format('yyyy-MM-dd HH-mm-sss')]"/>
+        <set-variable variableName="last_poll_date" value="#[server.dateTime.format('yyyy-MM-dd')]" doc:name="Variable"/>
+        <logger message="#[flowVars.last_poll_date]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="poll_with_watermarkFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/objectstore/gettime" doc:name="HTTP"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
