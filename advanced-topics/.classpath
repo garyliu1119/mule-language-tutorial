@@ -11,5 +11,6 @@
 	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="con" path="MULE_LIB/ObjectStore/org.mule.tooling.ui.contribution.objectstore.3.6.0"/>
+	<classpathentry kind="con" path="MULE_LIB/Secure Property Placeholder/org.mule.tooling.ui.contribution.secure-property-placeholder.3.8.0"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

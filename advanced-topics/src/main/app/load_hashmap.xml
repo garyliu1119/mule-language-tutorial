@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <ee:object-store-caching-strategy name="Caching_Strategy" keyGenerationExpression="#[payload]" doc:name="Caching Strategy">
+        <managed-store storeName="country_code" persistent="true"/>
+    </ee:object-store-caching-strategy>
+    <flow name="load_hashmapFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/parse/hash" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload.country]]></dw:set-payload>
+        </dw:transform-message>
+        <ee:cache cachingStrategy-ref="Caching_Strategy" doc:name="Cache">
+            <flow-ref name="lookup_country_code_main-Flow" doc:name="lookup_country_code_main-Flow"/>
+        </ee:cache>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="lookup_country_code_main-Flow">
+        <logger level="INFO" doc:name="Logger"/>
+        <choice doc:name="Choice">
+            <when expression="#[app.registry.get('countryCodeLookup') != 'DONE']">
+                <flow-ref name="load_hashmap-Flow" doc:name="load_hashmap-Flow"/>
+            </when>
+            <otherwise>
+                <logger message="#['Country Code Alread Loaded']" level="INFO" doc:name="Logger"/>
+            </otherwise>
+        </choice>
+        <flow-ref name="lookup_contry_code-Flow" doc:name="lookup_contry_code-Flow"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="lookup_contry_code-Flow">
+        <set-variable variableName="cCode" value="#['US']" doc:name="Variable"/>
+        <set-payload value="#[app.registry.get('countryCodeHashMap')[flowVars.cCode]]" doc:name="Set Payload"/>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="load_hashmap-Flow">
+        <parse-template location="src/main/resources/Country Code Mapping.csv" doc:name="Parse Template"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="71a7073a-c81c-4d7c-80d3-05b295e0124b">
+            <dw:input-payload mimeType="application/csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy"><![CDATA[def myHashMap = [:]
+payload.each {
+	myHashMap[it.Two] = it.Three
+}
+def myRegistry = muleContext.getRegistry()
+myRegistry.registerObject('countryCodeHashMap', myHashMap)
+myRegistry.registerObject('countryCodeLookup', 'DONE')
+return myHashMap]]></scripting:script>
+        </scripting:component>
+
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
