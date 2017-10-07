@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd">
+    <smtp:connector name="SMTP" contentType="text/html" subject="Test DL" validateConnections="true" doc:name="SMTP"/>
+    <flow name="send_emailFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/email" doc:name="HTTP"/>
+        <set-payload value="#['Testing DL, sorry for disturbance']" doc:name="Set Payload"/>
+        <smtp:outbound-endpoint host="mailhost-i.amgen.com" user="gliu03@amgen.com" to="gliu03@amgen.com" from="dl-mulesoft-ew-devteam@amgen.com" subject="Test EWC-Tech-Support DL" responseTimeout="10000" doc:name="SMTP" connector-ref="SMTP"/>
+        <logger message="#['Emaiil Sent!']" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

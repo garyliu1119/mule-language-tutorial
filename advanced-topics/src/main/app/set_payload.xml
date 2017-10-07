@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <flow name="set_payloadFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/s3/payload" doc:name="HTTP"/>
+        <set-payload value="SELECT count(*) from
+(
+select DISTINCT tbl.A_U_FLAG,tbl.VENDOR_ID,tbl.VENDOR_NAME,tbl.ADDRESS_LINE_1,tbl.ADDRESS_LINE_2,tbl.ADDRESS_CITY,tbl.ADDRESS_COUNTRY_CODE,tbl.ADDRESS_STATE_OR_REGION,tbl.ADDRESS_POSTAL_CODE,tbl.EMAIL,tbl.PHONE_NUMBER
+from
+(SELECT VC.*, CASE WHEN VP.VENDOR_ID IS NULL THEN 'A' 
+ELSE CASE WHEN VC.VENDOR_NAME&lt;&gt;VP.VENDOR_NAME OR  VC.ADDRESS_LINE_1&lt;&gt;VP.ADDRESS_LINE_1 OR VC.ADDRESS_LINE_2&lt;&gt;VP.ADDRESS_LINE_2 
+OR VC.ADDRESS_CITY&lt;&gt;VP.ADDRESS_CITY OR VC.ADDRESS_COUNTRY_CODE&lt;&gt;VP.ADDRESS_COUNTRY_CODE OR VC.ADDRESS_STATE_OR_REGION&lt;&gt;VP.ADDRESS_STATE_OR_REGION 
+OR VC.ADDRESS_POSTAL_CODE&lt;&gt;VP.ADDRESS_POSTAL_CODE OR VC.EMAIL&lt;&gt;VP.EMAIL OR VC.PHONE_NUMBER&lt;&gt;VP.PHONE_NUMBER OR VC.IS_ACTIVE&lt;&gt;VP.IS_ACTIVE THEN 'U' END END A_U_FLAG,
+rank() over (order by vc.vendor_id asc) rnk
+FROM rdhtb_dev.${s3.athena.vendor.curr} VC LEFT OUTER JOIN rdhtb_dev.${s3.athena.vendor.prev} VP ON VC.VENDOR_ID=VP.VENDOR_ID 
+WHERE ( VC.VENDOR_NAME&lt;&gt;COALESCE(VP.VENDOR_NAME,'NA') OR  VC.ADDRESS_LINE_1&lt;&gt;COALESCE(VP.ADDRESS_LINE_1,'NA') 
+OR VC.ADDRESS_LINE_2&lt;&gt;COALESCE(VP.ADDRESS_LINE_2,'NA') OR VC.ADDRESS_CITY&lt;&gt;COALESCE(VP.ADDRESS_CITY,'NA') 
+OR VC.ADDRESS_COUNTRY_CODE&lt;&gt;COALESCE(VP.ADDRESS_COUNTRY_CODE,'NA') OR VC.ADDRESS_STATE_OR_REGION&lt;&gt;COALESCE(VP.ADDRESS_STATE_OR_REGION,'NA') 
+OR VC.ADDRESS_POSTAL_CODE&lt;&gt;COALESCE(VP.ADDRESS_POSTAL_CODE,'NA') OR VC.EMAIL&lt;&gt;COALESCE(VP.EMAIL,'NA') OR VC.PHONE_NUMBER&lt;&gt;COALESCE(VP.PHONE_NUMBER,'NA') 
+OR VC.IS_ACTIVE&lt;&gt;COALESCE(VP.IS_ACTIVE,'Z') )
+) tbl)" doc:name="Set Payload"/>
+
+        <logger message="#['Test set-payload: ' + payload]" level="INFO" doc:name="Logger"/>    </flow>
+</mule>

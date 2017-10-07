@@ -25,6 +25,9 @@
 	
 		<!-- JDBC Logger shows queries and parameters values on DEBUG -->
 		<AsyncLogger name="com.mulesoft.mule.transport.jdbc" level="WARN"/>
+ 
+		<AsyncLogger name="com.mulesoft.mule.transport" level="DEBUG"/>
+ 
     
         <!-- CXF is used heavily by Mule for web services -->
         <AsyncLogger name="org.apache.cxf" level="WARN"/>

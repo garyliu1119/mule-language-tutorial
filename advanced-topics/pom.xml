@@ -12,7 +12,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<mule.version>3.8.3</mule.version>
+		<mule.version>3.8.5</mule.version>
     	<mule.tools.version>1.2</mule.tools.version>
 	</properties>
 
@@ -25,7 +25,13 @@
 				<extensions>true</extensions>
 				<configuration>
                     <copyToAppsDirectory>true</copyToAppsDirectory>
-				</configuration>
+				<inclusions>
+                        <inclusion>
+                            <groupId>org.mule.modules</groupId>
+                            <artifactId>mule-module-objectstore</artifactId>
+                        </inclusion>
+                    </inclusions>
+                </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -66,6 +72,7 @@
 			<version>${mule.version}</version>
 			<scope>provided</scope>
 		</dependency>
+	       
 		<!-- Xml configuration -->
 		<dependency>
 			<groupId>com.mulesoft.muleesb.modules</groupId>
@@ -130,7 +137,33 @@
             <version>${mule.version}</version>
             <scope>provided</scope>
         </dependency>
-	        
+	<dependency>
+            <groupId>com.mulesoft.security</groupId>
+            <artifactId>mule-module-security-property-placeholder</artifactId>
+            <version>1.6.5</version>
+        </dependency>
+	<dependency>
+            <groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.4</version>
+        </dependency>    
+		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+	<dependency>
+		    <groupId>org.seleniumhq.selenium</groupId>
+		    <artifactId>selenium-java</artifactId>
+		    <version>3.5.3</version>
+		</dependency>             
+    <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-objectstore</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+    <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-email</artifactId>
+            <version>${mule.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 	<repositories>
@@ -145,6 +178,11 @@
             <name>MuleSoft Releases Repository</name>
             <url>http://repository.mulesoft.org/releases/</url>
             <layout>default</layout>
+        </repository>
+    <repository>
+            <id>mule-ee-releases</id>
+            <name>MuleEE Releases Repository</name>
+            <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases-ee/</url>
         </repository>
     </repositories>
     <pluginRepositories>

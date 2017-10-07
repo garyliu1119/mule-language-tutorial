@@ -9,6 +9,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
     <flow name="dw_functionsFlow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/dw/func/filter" doc:name="HTTP"/>
+        <set-variable variableName="counter" value="#[1]" doc:name="Variable"/>
         <dw:transform-message doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
@@ -17,6 +18,10 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 	pg : payload.pg splitBy "|" filter ($ != "N/A")
 	
 }]]></dw:set-payload>
+            <dw:set-variable variableName="s3_key"><![CDATA[%dw 1.0
+%output application/java
+---
+'${s3.vendor.landing}' ++ '/' ++ now as :string {format:"yyyy-MM-dd"} ++ '/' ++ flowVars.counter ++ '.csv' ]]></dw:set-variable>
         </dw:transform-message>
         <logger level="INFO" doc:name="Logger" message="#[payload]"/>
     </flow>
