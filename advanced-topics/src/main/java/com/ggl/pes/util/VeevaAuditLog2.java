@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.amgen.pes.util;
+package com.ggl.pes.util;
 import java.io.IOException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

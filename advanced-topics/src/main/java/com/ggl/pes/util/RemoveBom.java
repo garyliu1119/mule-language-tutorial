@@ -1,4 +1,4 @@
-package com.amgen.pes.util;
+package com.ggl.pes.util;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;

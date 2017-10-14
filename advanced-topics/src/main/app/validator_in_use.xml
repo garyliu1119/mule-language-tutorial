@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    
+    <validation:config name="Validation_Configuration" doc:name="Validation Configuration"/>
+    
+    <flow name="validator_in_use-TestFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/validation" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <flow-ref name="validator_in_useFlow" doc:name="validator_in_useFlow"/>
+        <logger level="INFO" doc:name="Logger"/>
+        <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy 
+            	when="#[exception.causedBy(java.lang.IllegalArgumentException)]"
+            	logException="false" 
+            	doc:name="Catch Invalid data Exception Strategy" >
+	                <set-payload value="#['Invalid Data: ' + payload]" doc:name="Set Payload"/>
+	                <set-variable variableName="reason" value="invalid input" doc:name="Variable"/>
+	                <set-variable variableName="statuscode" value="400" doc:name="Variable"/>
+            </catch-exception-strategy>
+            <catch-exception-strategy 
+            	when="#[exception.causedBy(java.lang.Exception)]"
+            	logException="false" 
+            	doc:name="Catch Unknow Exception Strategy" >
+	                <set-payload value="#['Data: ' + payload]" doc:name="Set Payload"/>
+	                <set-variable variableName="reason" value="invalid input" doc:name="Variable"/>
+	                <set-variable variableName="statuscode" value="400" doc:name="Variable"/>
+            </catch-exception-strategy>
+        </choice-exception-strategy>
+    </flow>
+    <flow name="validator_in_useFlow">
+        <validation:is-not-empty 
+        	message="#['Payload Cannot Be Empty!']" 
+        	exceptionClass="java.lang.IllegalArgumentException" 
+        	value="#[payload]" 
+        	doc:name="Validation"/>
+        	
+        <validation:is-true 
+        	expression="#[sessionVars.run_status != null]"  
+        	config-ref="Validation_Configuration" 
+        	message="#['The application is in wrong state']" 
+        	doc:name="Validation" exceptionClass="com.ggl.esb.exception.WrongStateException"/>	
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>

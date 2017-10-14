@@ -1,4 +1,4 @@
-package com.amgen.utils;
+package com.ggl.esb.utils;
 
 public class MyJavaPoc {
 	public static void main(String[] args) {

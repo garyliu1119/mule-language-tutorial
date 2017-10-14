@@ -1,4 +1,4 @@
-package com.amgen.utils;
+package com.ggl.esb.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

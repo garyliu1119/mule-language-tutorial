@@ -52,7 +52,8 @@ payload map ((payload01 , indexOfPayload01) -> {
 		Cost_Center_Reference_ID: getCostCenter(payload01."Cost Center or WBS Element Code")[1],
 		Location_ID: payload01."Job Site Code",
 		Position_Time_Type_ID: payload01."Position Time Type",
-		Workday_Worker_Type: payload01."Workday Worker Type"		
+		Workday_Worker_Type: payload01."Workday Worker Type",
+		(OK_OK: payload01."Start Date")	when  normalize2(payload01."Start Date") as :date {format: "yyyy-MM-dd"}  > todayDate
 	},
 	requisition: {
 		comments: "Test",
