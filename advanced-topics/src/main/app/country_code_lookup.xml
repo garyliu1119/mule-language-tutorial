@@ -14,12 +14,16 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
         <managed-store storeName="country_code" persistent="true"/>
     </ee:object-store-caching-strategy>
     <flow name="load_hashmapFlow">
-        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/parse/hash" doc:name="HTTP"/>
         <dw:transform-message doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
-payload.country]]></dw:set-payload>
+payload]]></dw:set-payload>
+
+            <dw:set-variable variableName="country_code"><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-variable>
         </dw:transform-message>
         <ee:cache cachingStrategy-ref="Caching_Strategy" doc:name="Cache">
             <flow-ref name="lookup_country_code_main-Flow" doc:name="lookup_country_code_main-Flow"/>
@@ -40,12 +44,11 @@ payload.country]]></dw:set-payload>
         <logger message="#[payload]" level="INFO" doc:name="Logger"/>
     </flow>
     <flow name="lookup_contry_code-Flow">
-        <set-variable variableName="cCode" value="#['US']" doc:name="Variable"/>
-        <set-payload value="#[app.registry.get('countryCodeHashMap')[flowVars.cCode]]" doc:name="Set Payload"/>
+        <set-payload value="#[app.registry.get('countryCodeHashMap')[flowVars.country_code]]" doc:name="Set Payload"/>
         <logger level="INFO" doc:name="Logger"/>
     </flow>
     <flow name="load_hashmap-Flow">
-        <parse-template location="src/main/resources/Country Code Mapping.csv" doc:name="Parse Template"/>
+        <parse-template location="Country_Code_Mapping.csv" doc:name="Parse Template"/>
         <dw:transform-message doc:name="Transform Message" metadata:id="71a7073a-c81c-4d7c-80d3-05b295e0124b">
             <dw:input-payload mimeType="application/csv"/>
             <dw:set-payload><![CDATA[%dw 1.0
