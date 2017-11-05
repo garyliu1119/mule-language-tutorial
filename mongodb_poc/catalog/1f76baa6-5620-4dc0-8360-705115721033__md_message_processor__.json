@@ -1,0 +1,11 @@
+{
+    "inputMessageMetadata": {},
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "inventory-schema"
+        }
+    },
+    "id": "1f76baa6-5620-4dc0-8360-705115721033",
+    "version": "5.2.0.0"
+}

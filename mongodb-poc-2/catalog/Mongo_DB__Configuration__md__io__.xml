@@ -1,0 +1,15 @@
+<metadata__cache__entry>
+  <version>5.2.0.0</version>
+  <connectorName>Mongo_DB__Configuration</connectorName>
+  <metadataIo class="tree-map">
+    <entry>
+      <string>http://www.mulesoft.org/schema/mule/mongo/insert-documents</string>
+      <map>
+        <entry>
+          <string>__default__</string>
+          <org.mule.tooling.metadata.cache.DefaultMetadataCacheEntry/>
+        </entry>
+      </map>
+    </entry>
+  </metadataIo>
+</metadata__cache__entry>

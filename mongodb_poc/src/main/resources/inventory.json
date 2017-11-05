@@ -1,0 +1,14 @@
+  {
+    "item": "ABC1",
+    "details": {
+      "model": "14Q3",
+      "manufacturer": "XYZ Company"
+    },
+    "stock": [
+      {
+        "size": "S",
+        "qty": 25
+      }
+    ],
+    "category": "clothing"
+  }

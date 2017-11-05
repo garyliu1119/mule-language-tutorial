@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <mongo:config name="Mongo_DB" username="gary" password="password" database="test"  doc:name="Mongo DB"/>
+
+    <mongo:config name="Mongo_DB_Test" username="gary" password="wrongpass" database="test"  doc:name="Mongo DB" connectTimeout="10000" connectionsPerHost="5" maxWaitTime="10000" socketTimeout="10000"/>
+
+    <catch-exception-strategy name="Catch_Connection_Exception_Strategy">
+        <logger level="INFO" doc:name="Logger" message="#[org.mule.util.ExceptionUtils]"/>
+        <set-payload value="Cannot connect to MongoDB : #[exception.cause.message]" doc:name="Set Payload"/>
+    </catch-exception-strategy>
+</mule>
