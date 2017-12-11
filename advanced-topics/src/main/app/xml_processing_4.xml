@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
+    <flow name="xml_processing_4Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/xml-transform4" doc:name="HTTP"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <set-variable variableName="original_hire_date" value="#['2017-05-13']" doc:name="Copy_of_Variable"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="a82ff08b-a589-4a13-8134-8928b84a2685">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%function formatDate(date) (date splitBy "T")[0]
+%namespace ns0 urn:com.workday.report/Worker_Business_Process_Transactions
+---
+(payload.ns0#Report_Data.*ns0#Report_Entry  map {
+	WID : $.ns0#WID,
+	last_end_contract_date: $.ns0#Transaction_Entry_Moment,
+	bpt: $.ns0#Business_Process_Transaction[@Descriptor]
+} orderBy $.last_end_contract_date) [-1..0]]]></dw:set-payload>
+        </dw:transform-message>
+        <enricher doc:name="Message Enricher" source="#[payload]" target="#[flowVars.last_end_contract_date]">
+            <flow-ref name="xml_processing_get_last_end_contract_date-Flow" doc:name="xml_processing_get_last_end_contract_date-Flow"/>
+        </enricher>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+(payload filter ($.last_end_contract_date > flowVars.last_end_contract_date) map $.WID ) 
+when flowVars.last_end_contract_date != null 
+otherwise 
+	(payload map $.WID )
+]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+
+    </flow>
+    <flow name="xml_processing_get_last_end_contract_date_old">
+        <logger level="INFO" doc:name="Logger"/>
+        <set-variable variableName="original_hire_date" value="#['2017-05-13']" doc:name="Variable"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="a82ff08b-a589-4a13-8134-8928b84a2685">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%function formatDate(date) (date splitBy "T")[0]
+%namespace ns0 urn:com.workday.report/Worker_Business_Process_Transactions
+---
+(payload.ns0#Report_Data.*ns0#Report_Entry filter ($.ns0#Business_Process_Transaction[@Descriptor] contains "End Contract") map {
+	WID : $.ns0#Worker.*ns0#ID[?($.@type == "WID")],
+	CW_ID : $.ns0#Worker.*ns0#ID[?($.@type == "Contingent_Worker_ID")],
+	last_end_contract_date: $.ns0#Transaction_Entry_Moment
+} orderBy $.last_end_contract_date) [-1..0]]]></dw:set-payload>
+        </dw:transform-message>
+        <expression-component doc:name="Expression"><![CDATA[mydate = '';
+
+if (payload == null) {
+	mydate = flowVars.original_hire_date
+} else {
+	mydate = payload[0].last_end_contract_date
+};
+
+return payload=mydate;]]></expression-component>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    
+    <flow name="xml_processing_get_last_end_contract_date-Flow">
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload filter ($.bpt contains "End Contract")]]></dw:set-payload>
+        </dw:transform-message>
+        <expression-component doc:name="Copy_of_Expression"><![CDATA[mydate = null;
+
+if (payload != empty) {
+	mydate = payload[0].last_end_contract_date
+};
+
+return payload=mydate;]]></expression-component>
+    </flow>
+</mule>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+    <validation:config name="Validate_Null_Payload" doc:name="Validation Configuration"/>
+    <flow name="effective-caching-TestFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/csv/hashmap" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="f4339122-a207-4955-97ac-e2d647e52e51">
+            <dw:input-payload mimeType="application/java"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload as :string]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger" message="#[payload]"/>
+        <flow-ref name="effective_caching-main-Flow" doc:name="Flow Reference"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+	</flow>
+    <flow name="effective_caching-main-Flow">
+        <validation:is-not-empty config-ref="Validate_Null_Payload" message="#['Input country code cannot be null']" value="#[payload]" doc:name="Validation"/>
+        <ee:cache doc:name="Cache">
+            <set-payload value="#[app.registry.get('countryCodeHashMap')[payload.toUpperCase()]]" doc:name="Set Payload"/>
+            <logger level="INFO" doc:name="Logger" message="#['Retrieve Country: ' + payload]"/>
+        </ee:cache>
+                <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy 
+            	when="#[exception.causedBy(java.lang.IllegalArgumentException)]"
+            	logException="false" 
+            	doc:name="Catch Invalid data Exception Strategy" >
+	                <set-payload value="#['Invalid Data: ' + payload]" doc:name="Set Payload"/>
+	                <set-variable variableName="reason" value="invalid input" doc:name="Variable"/>
+	                <set-variable variableName="statuscode" value="400" doc:name="Variable"/>
+            </catch-exception-strategy>
+            <catch-exception-strategy 
+            	when="#[exception.causedBy(java.lang.Exception)]"
+            	logException="false" 
+            	doc:name="Catch Unknow Exception Strategy" >
+	                <set-payload value="#['Data: ' + payload]" doc:name="Set Payload"/>
+	                <set-variable variableName="reason" value="invalid input" doc:name="Variable"/>
+	                <set-variable variableName="statuscode" value="400" doc:name="Variable"/>
+            </catch-exception-strategy>
+        </choice-exception-strategy>
+    </flow>
+        
+    <flow name="effective-caching-load-data-Flow">
+        <parse-template location="Country_Code_Mapping.csv" doc:name="load coutry code"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="accb6b1c-7213-4b98-a8c3-001972044537">
+            <dw:input-payload mimeType="application/csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload map {
+	($.Two) : $.Three
+ } reduce ($$ ++ $)]]></dw:set-payload>
+        </dw:transform-message>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy"><![CDATA[muleContext.getRegistry().registerObject('countryCodeHashMap', payload)
+return payload]]></scripting:script>
+        </scripting:component>
+        <logger message="#['Country Code Data Loader: ' + payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+</mule>
