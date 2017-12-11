@@ -18,6 +18,18 @@
 
 	<build>
 		<plugins>
+		    <plugin>
+                <groupId>org.scala-tools</groupId>
+               <artifactId>maven-scala-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<groupId>org.mule.tools.maven</groupId>
 				<artifactId>mule-app-maven-plugin</artifactId>
@@ -144,8 +156,8 @@
         </dependency>
 	<dependency>
             <groupId>com.oracle.jdbc</groupId>
-            <artifactId>ojdbc6</artifactId>
-            <version>11.2.0.4</version>
+            <artifactId>ojdbc8</artifactId>
+            <version>12.2.0.1</version>
         </dependency>    
 		<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
 	<dependency>
@@ -188,6 +200,12 @@
             <version>${mule.version}</version>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+		    <groupId>org.scala-lang</groupId>
+		    <artifactId>scala-library</artifactId>
+		    <version>2.11.8</version>
+		</dependency>		
     </dependencies>
 
 	<repositories>
@@ -210,6 +228,17 @@
         </repository>
     </repositories>
     <pluginRepositories>
+        <pluginRepository>
+	        <id>scala</id>
+	        <name>Scala Tools</name>
+	        <url>http://scala-tools.org/repo-releases/</url>
+	        <releases>
+	            <enabled>true</enabled>
+	        </releases>
+	        <snapshots>
+	            <enabled>false</enabled>
+	        </snapshots>
+	    </pluginRepository>
         <pluginRepository>
             <id>mulesoft-release</id>
             <name>mulesoft release repository</name>

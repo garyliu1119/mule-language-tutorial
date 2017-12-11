@@ -15,5 +15,11 @@ http://www.mulesoft.org/schema/mule/secure-property-placeholder http://www.mules
  			</global-functions>
          </expression-language>
      </configuration>
+     
+     <spring:bean id="flowInvoker" name="flowInvoker"
+     	class="com.ggl.esb.utils.FlowInvokerContextListener"
+     	scope="singleton">
+     		<spring:property name="flowName" value="effective-caching-load-data-Flow"/>
+     </spring:bean>
 
 </mule>

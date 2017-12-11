@@ -16,7 +16,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
-payload groupBy $."Transaction Type"]]></dw:set-payload>
+payload filter ($."Gary Attribute" != "OK") groupBy $."Transaction Type" ]]></dw:set-payload>
         </dw:transform-message>
         
         <scatter-gather doc:name="Scatter-Gather">

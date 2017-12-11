@@ -20,6 +20,7 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 ---
 payload]]></dw:set-payload>
         </dw:transform-message>
+        <set-payload value="#[null]" doc:name="Set Payload"/>
         <flow-ref name="validator_in_useFlow" doc:name="validator_in_useFlow"/>
         <logger level="INFO" doc:name="Logger"/>
         <choice-exception-strategy doc:name="Choice Exception Strategy">
@@ -46,7 +47,7 @@ payload]]></dw:set-payload>
         	message="#['Payload Cannot Be Empty!']" 
         	exceptionClass="java.lang.IllegalArgumentException" 
         	value="#[payload]" 
-        	doc:name="Validation"/>
+        	doc:name="Validation" config-ref="Validation_Configuration"/>
         	
         <validation:is-true 
         	expression="#[sessionVars.run_status != null]"  
