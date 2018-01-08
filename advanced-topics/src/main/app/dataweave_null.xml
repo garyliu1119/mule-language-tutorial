@@ -7,26 +7,16 @@
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
-    <flow name="build_array_list_from_stringFlow">
-        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/string/list" doc:name="HTTP"/>
+    <flow name="dataweave_nullFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/null-check" doc:name="HTTP"/>
         <dw:transform-message doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 ---
-payload.pg splitBy "|" filter ($ != "N/A") map {
-	provisioning_group : $,
-	status : "Assigned"
+payload default [] map {
+	fName: $.lastName
 }]]></dw:set-payload>
         </dw:transform-message>
-        <logger level="INFO" doc:name="Logger"/>
-        <expression-component doc:name="Expression"><![CDATA[if (payload == empty ) {
-
-	flowVars.status = "Empty Payload"
-
-} else {
-
-	flowVars.status = "OK OK"
-}]]></expression-component>
-        <logger level="INFO" doc:name="Logger"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
     </flow>
 </mule>

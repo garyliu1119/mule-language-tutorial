@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
+    <flow name="process_get_workers_responseFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/xml/workers" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="6a0205a4-1a98-4a8f-b08c-0b9c92ae8257">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 urn:com.workday/bsvc
+---
+payload.ns0#Get_Workers_Response.ns0#Response_Data.*ns0#Worker.ns0#Worker_Data.ns0#Personal_Data.ns0#Contact_Data.*ns0#Email_Address_Data
+]]></dw:set-payload>
+        </dw:transform-message>
+        <scripting:component doc:name="Groovy">
+            <scripting:script engine="Groovy"><![CDATA[println('TYPE=' + payload.Usage_Data.Type_Data.Type_Reference.ID )
+
+def work_email = ''
+	
+if (payload != null && payload.size() != 0 ) {
+	payload.each {
+		if (it.Usage_Data.Type_Data.Type_Reference.ID == 'WORK') {
+			println (it.Email_Address)
+			work_email = it.Email_Address
+		}
+	}
+} 
+return payload = work_email]]></scripting:script>
+        </scripting:component>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    
+        <flow name="process_get_workers_response-betterFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/xml/workers/2" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="6a0205a4-1a98-4a8f-b08c-0b9c92ae8257">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 urn:com.workday/bsvc
+---
+payload.ns0#Get_Workers_Response.ns0#Response_Data.*ns0#Worker.ns0#Worker_Data.ns0#Personal_Data.ns0#Contact_Data.*ns0#Email_Address_Data
+map {
+	email: $.ns0#Email_Address,
+	wid: $.ns0#Usage_Data.ns0#Type_Data.ns0#Type_Reference.*ns0#ID[?($.@ns0#type == "WID")][0],
+	type: $.ns0#Usage_Data.ns0#Type_Data.ns0#Type_Reference.*ns0#ID[?($.@ns0#type == "Communication_Usage_Type_ID")][0]
+}
+]]></dw:set-payload>
+        </dw:transform-message>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    
+    <flow name="process_get_workers_responseFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advance/xml/workers/xpath3" doc:name="HTTP"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <expression-transformer expression="#[xpath3('//*:Worker/*:Worker_Data/*:Personal_Data/*:Contact_Data/*:Email_Address_Data')]" doc:name="Expression"/>
+        <logger level="INFO" doc:name="Logger" message="#[payload]"/>
+    </flow>
+</mule>

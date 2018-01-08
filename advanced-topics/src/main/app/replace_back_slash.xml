@@ -11,19 +11,21 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
     <flow name="replace_back_slash-Flow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/special/charater" doc:name="HTTP"/>
+<!--         
         <set-payload value="#[['name': 'Gary &quot;Midle Name&quot; Liu',  'value' : 100]]" doc:name="Set Payload"/>
+  -->       
         <dw:transform-message doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
-%output application/csv separator=",", quoteValues=true
+%output application/csv separator="|", quoteValues=true, quote="\""
 ---
-[{
-	name: payload.name,
-	value: payload.value
-}]]]></dw:set-payload>
+payload map {
+	name: ($.name as :string) replace /(\\)/ with "-",
+	value: $.value
+}]]></dw:set-payload>
         </dw:transform-message>
-        <logger level="INFO" doc:name="Logger" message="#[payload]"/>
+        <logger level="INFO" doc:name="Logger" message="#['\n' + payload]"/>
         <byte-array-to-string-transformer doc:name="Byte Array to String"/>
         <set-payload value="#[payload.replaceAll('\\\\', '')]" doc:name="Set Payload"/>
-        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <logger message="#['\n' + payload]" level="INFO" doc:name="Logger"/>
     </flow>
 </mule>

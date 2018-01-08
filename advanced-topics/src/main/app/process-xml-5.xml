@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <flow name="process-xml-5Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/xml/5" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="26b4aeee-18c5-4809-af0f-949c87d788d5">
+            <dw:input-payload mimeType="application/xml"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 urn:com.workday/bsvc
+---
+payload.ns0#Get_Workers_Response.ns0#Response_Data.ns0#Worker.ns0#Worker_Data.ns0#Personal_Data.ns0#Identification_Data.*ns0#Custom_ID 
+filter $.ns0#Custom_ID_Data.ns0#ID_Type_Reference.*ns0#ID[?($.@ns0#type == "Custom_ID_Type_ID")][0] == "CW Workorder Number"]]></dw:set-payload>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger" message="#[payload]"/>
+    </flow>
+</mule>

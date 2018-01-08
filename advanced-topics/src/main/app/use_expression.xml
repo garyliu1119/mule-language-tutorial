@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <flow name="use_expressionFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/expression/dates" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="16377d76-fca2-4ee6-9302-8838941eceb7">
+            <dw:input-payload mimeType="application/csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+        </dw:transform-message>
+        <expression-component doc:name="Expression"><![CDATA[logger = org.slf4j.LoggerFactory.getLogger('advanced-topics');
+
+log.info('Not sure this works');
+
+logger.info('---Hello, World====');
+
+aDateString = payload[0].'Start Date';
+
+startDate = (new org.mule.el.datetime.DateTime(aDateString, 'MM/dd/yyyy')).format('MM-dd-yyyy');
+logger.info('startDate=' + startDate);
+
+today = server.dateTime.format('MM-dd-yyyy');
+logger.info('today=' + today);
+
+logger.info('mule.env=' + '${mule.env}');
+
+if ( startDate >= today ) {
+
+	logger.info('OK Not Future Date');
+
+}  else {
+
+logger.info('OK Future Date');
+	
+}]]></expression-component>
+        <logger level="INFO" doc:name="Logger" message="#[payload]"/>
+    </flow>
+</mule>
