@@ -5,4 +5,5 @@
     <muleExtension name="ObjectStore" qualifier="org.mule.tooling.ui.contribution.objectstore.3.6.0"/>
     <muleExtension name="Secure Property Placeholder" qualifier="org.mule.tooling.ui.contribution.secure-property-placeholder.3.8.0"/>
     <muleExtension name="Secure Property Placeholder" qualifier="org.mule.tooling.ui.contribution.secure-property-placeholder.3.8.1"/>
+    <muleExtension name="Filters" qualifier="org.mule.tooling.ui.contribution.filters.3.8.1"/>
 </mule-project>

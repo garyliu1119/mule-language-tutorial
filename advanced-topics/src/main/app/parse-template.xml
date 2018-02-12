@@ -6,19 +6,11 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
-    <flow name="expression_setFlow">
-        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/expression" doc:name="HTTP"/>
-        <set-payload value="#[['aa' : '1234', 'bb' : '2222', 'cc' : '3333']]" doc:name="Set Payload"/>
-        <expression-component doc:name="Expression"><![CDATA[//try {
-	payload.aa = 'aaaa';
-	payload.bb = 'bbb';
-	payload.ff = 'ffff';
-	flowVars.temp = 'tempVars';
-//} catch (e) {
-   System.out.println('OK');
-//}
-return payload;
-]]></expression-component>
+    <flow name="parse-templateFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/parse" doc:name="HTTP"/>
+        <set-variable variableName="staff_id" value="#['123456789']" doc:name="Variable"/>
+        <set-session-variable variableName="session_id" value="#['session_1234']" doc:name="Session Variable"/>
+        <parse-template location="invalidStaffIdMailbody.html" doc:name="Parse Template"/>
         <logger level="INFO" doc:name="Logger"/>
     </flow>
 </mule>

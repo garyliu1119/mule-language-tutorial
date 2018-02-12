@@ -18,7 +18,8 @@ payload map ((record) -> {
 	Contract_End_Date: normalizeDate(record."End Date") as :date,
 	end_date: normalizeDate2(record."End Date") as :date,
 	Last_Day_of_Work: normalizeDate2(record."End Date"),
-	termination_reason: getReasonId2(record."Closed Reason")
+	termination_reason: getReasonId2(record."Closed Reason"),
+	absValue: abs(3, 9)
 })]]></dw:set-payload>
         </dw:transform-message>
         <set-variable variableName="Test-Reason" value="#[getReasonId2('First - Second')]" doc:name="Variable"/>

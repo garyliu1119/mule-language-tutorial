@@ -7,19 +7,23 @@
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
-    <flow name="process-xml-5Flow">
-        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/xml/5" doc:name="HTTP"/>
-        <dw:transform-message doc:name="Transform Message" metadata:id="26b4aeee-18c5-4809-af0f-949c87d788d5">
-            <dw:input-payload mimeType="application/xml"/>
+    <flow name="csv-java-mapobjectFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/csv/java/mapobject" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="080be7d0-759c-4ac3-af7f-8f8f1acf7554">
+            <dw:input-payload mimeType="application/csv"/>
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
-%namespace ns0 urn:com.workday/bsvc
 ---
-payload.ns0#Get_Workers_Response.ns0#Response_Data.ns0#Worker.ns0#Worker_Data.ns0#Personal_Data.ns0#Identification_Data.*ns0#Custom_ID 
-filter $.ns0#Custom_ID_Data.ns0#ID_Type_Reference.*ns0#ID[?($.@ns0#type == "Custom_ID_Type_ID")][0] == "CW Workorder Number"
-map $.ns0#Custom_ID_Shared_Reference.*ns0#ID[?($.@ns0#type == "Custom_Identifier_Reference_ID")]
+payload filter ($.is_valid_worker != 'NO') 
+map ((ew) -> {
+	(ew mapObject (value, key) -> {
+		((key) : updateBusinessTitle(value)) when (key as :string == 'Job Posting Title'),
+		((key) : value) when (key as :string != 'Job Posting Title')
+	})
+}) groupBy $."Transaction Type"
+
 ]]></dw:set-payload>
         </dw:transform-message>
-        <logger level="INFO" doc:name="Logger" message="#[payload]"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
     </flow>
 </mule>

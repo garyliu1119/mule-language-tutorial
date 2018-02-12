@@ -10,12 +10,24 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
     <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
     <flow name="json-csv-main_Flow">
-        <http:listener config-ref="HTTP_Listener_Configuration" path="/json-csv" doc:name="HTTP"/>
-        <dw:transform-message doc:name="Transform Message">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/hashmap/csv" doc:name="HTTP"/>
+        <dw:transform-message doc:name="Transform Message" metadata:id="0dd06eba-1192-4e99-9925-c9699a55acc7">
+            <dw:input-payload mimeType="application/csv"/>
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
+%input payload application/csv
 ---
 payload]]></dw:set-payload>
+        </dw:transform-message>
+        <set-payload value="#[payload[0]]" doc:name="Set Payload"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/csv header=false
+%input payload application/java
+---
+[
+	payload
+]]]></dw:set-payload>
         </dw:transform-message>
         <logger message="#[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger"/>
     </flow>

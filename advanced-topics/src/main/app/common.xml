@@ -11,7 +11,16 @@ http://www.mulesoft.org/schema/mule/secure-property-placeholder http://www.mules
          <expression-language autoResolveVariables="true">         
          	<import class="org.mule.util.StringUtils" />
          	<import class="org.mule.el.datetime.DateTime"/>
-            <global-functions file="my_global_functions.mvel">           
+            <global-functions file="my_global_functions.mvel">    
+            	def hello(aName) {
+            		return 'Hello ' + aName;
+            	}    
+            	def updateBusinessTitle(businessTitle) {
+            		return 'CW-' + com.ggl.esb.utils.UpdateBusinessTitle.updateBusinessTitle(businessTitle);
+            	}   
+            	def abs(leftVar, rightVar) {
+            		return java.lang.Math.abs((leftVar - rightVar));
+            	}
  			</global-functions>
          </expression-language>
      </configuration>

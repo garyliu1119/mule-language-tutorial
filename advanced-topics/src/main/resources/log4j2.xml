@@ -40,6 +40,7 @@
 
         <!-- Mule classes -->
         <AsyncLogger name="org.mule" level="INFO"/>
+        <AsyncLogger name="org.mule.routing" level="INFO"/>        
         <AsyncLogger name="com.mulesoft" level="INFO"/>
 
         <!-- Reduce DM verbosity -->

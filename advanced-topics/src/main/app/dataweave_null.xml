@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
     <flow name="dataweave_nullFlow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/null-check" doc:name="HTTP"/>
+        <validation:is-not-null config-ref="Validation_Configuration" message="#['Payload Cannot Be null']" value="#[payload]" doc:name="Validation"/>
         <dw:transform-message doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
+%output application/json
 ---
-payload default [] map {
-	fName: $.lastName
-}]]></dw:set-payload>
+{
+	lastName: payload..lastName,
+	absValue: abs -9
+}
+]]></dw:set-payload>
         </dw:transform-message>
-        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        <set-variable variableName="myVar" value="#[-9]" doc:name="Variable"/>
+        <logger message="#[dw(&quot;abs flowVars.myVar&quot;)]" level="INFO" doc:name="Logger"/>
     </flow>
 </mule>

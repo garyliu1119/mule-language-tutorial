@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
     <flow name="dw_functionsFlow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/dw/func/filter" doc:name="HTTP"/>
         <set-variable variableName="counter" value="#[1]" doc:name="Variable"/>
@@ -15,7 +16,8 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 %output application/java
 ---
 {
-	pg : payload.pg splitBy "|" filter ($ != "N/A")
+	pg : payload.pg splitBy "|" filter ($ != "N/A"),
+	name: updateBusinessTitle(payload.business_title)
 	
 }]]></dw:set-payload>
             <dw:set-variable variableName="s3_key"><![CDATA[%dw 1.0
@@ -25,17 +27,24 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
         </dw:transform-message>
         <logger level="INFO" doc:name="Logger" message="#[payload]"/>
     </flow>
-    <flow name="dw_functionsFlow1">
-        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/dw/func/array" doc:name="HTTP"/>
+    <flow name="dw_functions-date-Flow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/advanced/dw/func/dates" doc:name="HTTP"/>
         <dw:transform-message doc:name="Transform Message">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/java
-%function splitDate (data) (data splitBy "-")[0..-2] reduce ($$ ++ '-' ++ $)
+%function splitDate (data) (data splitBy "/")[0..-2] reduce ($$ ++ '-' ++ $)
 %var aPeriod = ("P" ++ 1 ++ "D")
-%function getTerminationDate(aDate) (aDate as :date {format: "yyyy-MM-dd-hh:mm"} - aPeriod) as :string {format: "yyyy-MM-dd"}
+%var today = now as :date {format: "yyyy-MM-dd"} 
+%var yesterday = today - aPeriod
+%var tomorrow = today + aPeriod
+%function getTerminationDate(aDate) (aDate as :date {format: "yyyy-MM-dd"} - aPeriod) as :string {format: "yyyy-MM-dd"}
 ---
 {
-	date: getTerminationDate (payload.pg)
+	date: getTerminationDate (payload.pg),
+	today: today,
+	yesterday : yesterday,
+	tomorrow: tomorrow,
+	data: splitDate(payload.data)
 }]]></dw:set-payload>
         </dw:transform-message>
         <logger message="#[payload]" level="INFO" doc:name="Logger"/>
