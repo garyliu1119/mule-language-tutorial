@@ -1,0 +1,44 @@
+<HTML>
+    <HEAD>
+      <TITLE>$emailInfo.subject</TITLE>
+    </HEAD>
+
+    <BODY>
+      <BR>
+      Environment: $emailInfo.environment
+      
+      <BR><BR>
+      Integration ID: $emailInfo.integrationId
+      <BR/>
+      <BR/>
+      
+      $emailInfo.body
+      
+      <BR/><BR/>
+    
+      <TABLE width="70% "border = "1" cellspacing="0" cellpadding="2" font="5">
+      	<TR style="text-align: left; font-size: 14px; font-weight: bold; color: #000000;">
+        
+        #foreach ($headerCol in $emailInfo.payload.header)
+            		<TH>$headerCol</TH>
+        #end
+        
+        </TR>
+        
+        #foreach ($data in $emailInfo.payload.data)
+          	<TR style="text-align: left; font-size: 13px; font-weight: bold; color: #488AC7;">         	
+            #foreach ($col in $data)
+            		<TD>$col</TD>
+            #end          	
+          	</TR>
+        #end
+      </TABLE>
+     
+     <BR/>
+     <BR/>
+      
+     <I>$emailInfo.footer</I>
+          
+ 
+    </BODY>
+  </HTML>
